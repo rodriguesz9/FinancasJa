@@ -571,7 +571,7 @@ $progress = calculateProgress($courses, $completed_lessons);
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="conversabot.php.php">
+                        <a class="nav-link" href="conversabot.php">
                             <i class="bi bi-robot me-1"></i>Assistente IA
                         </a>
                     </li>
@@ -587,7 +587,7 @@ $progress = calculateProgress($courses, $completed_lessons);
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="about.php"><i class="bi bi-info-circle me-2"></i>Sobre</a></li>
                             <li><a class="dropdown-item" href="plans.php"><i class="bi bi-star me-2"></i>Planos</a></li>
-                            <li><a class="dropdown-item" href="support.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
+                            <li><a class="dropdown-item" href="support1.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -971,7 +971,7 @@ $progress = calculateProgress($courses, $completed_lessons);
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="dashboard.php" class="footer-link">Dashboard</a></li>
                     <li class="mb-2"><a href="investments.php" class="footer-link">Investimentos</a></li>
-                    <li class="mb-2"><a href="conversabot.php.php" class="footer-link">Assistente IA</a></li>
+                    <li class="mb-2"><a href="conversabot.php" class="footer-link">Assistente IA</a></li>
                     <li class="mb-2"><a href="education.php" class="footer-link">Academia</a></li>
                 </ul>
             </div>
@@ -989,7 +989,7 @@ $progress = calculateProgress($courses, $completed_lessons);
             <div class="col-lg-2">
                 <h6 class="fw-bold mb-3">Suporte</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="support.php" class="footer-link">Central de Ajuda</a></li>
+                    <li class="mb-2"><a href="support1.php" class="footer-link">Central de Ajuda</a></li>
                     <li class="mb-2"><a href="support1.php" class="footer-link">Contato</a></li>
                     <li class="mb-2"><a href="about.php" class="footer-link">Sobre Nós</a></li>
                     <li class="mb-2"><a href="about1.php" class="footer-link">Nossa História</a></li>

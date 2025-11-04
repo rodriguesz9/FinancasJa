@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 require_once 'config/database.php';
@@ -57,7 +56,7 @@ requireLogin();
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .message-bubble strong {
-            font-weight: bold !important; /* Garantia de negrito */
+            font-weight: bold !important;
         }
         .quick-questions {
             display: flex;
@@ -79,14 +78,6 @@ requireLogin();
             background: var(--primary-purple);
             color: var(--light-bg);
             transform: translateY(-2px);
-        }
-        .typing-indicator {
-            display: none;
-            text-align: left;
-        }
-        .typing-indicator .message-bubble {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .typing-dots {
             display: inline-block;
@@ -202,7 +193,7 @@ requireLogin();
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="about.php"><i class="bi bi-info-circle me-2"></i>Sobre</a></li>
                         <li><a class="dropdown-item" href="plans.php"><i class="bi bi-star me-2"></i>Planos</a></li>
-                        <li><a class="dropdown-item" href="support.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
+                        <li><a class="dropdown-item" href="support1.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
                     </ul>
                 </li>
             </ul>
@@ -284,23 +275,6 @@ requireLogin();
                             </div>
                         </div>
                         
-                        <!-- Typing Indicator -->
-                        <div class="message bot typing-indicator" id="typingIndicator">
-                            <div class="message-bubble">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(138, 43, 226, 0.2); display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-robot text-purple"></i>
-                                        </div>
-                                    </div>
-                                    <div class="typing-dots">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <!-- Quick Questions -->
                         <div class="mt-4">
                             <h6 class="fw-bold mb-3">💡 Perguntas Populares</h6>
@@ -325,9 +299,6 @@ requireLogin();
                                 </div>
                             </div>
                         </div>
-
-                        
-                        
 
                         <!-- Message Input -->
                         <div class="chat-input-container mt-4">
@@ -400,7 +371,7 @@ requireLogin();
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="dashboard.php" class="footer-link">Dashboard</a></li>
                     <li class="mb-2"><a href="investments.php" class="footer-link">Investimentos</a></li>
-                    <li class="mb-2"><a href="conversabot.php.php" class="footer-link">Assistente IA</a></li>
+                    <li class="mb-2"><a href="conversabot.php" class="footer-link">Assistente IA</a></li>
                     <li class="mb-2"><a href="education.php" class="footer-link">Academia</a></li>
                 </ul>
             </div>
@@ -420,7 +391,7 @@ requireLogin();
             <div class="col-lg-2">
                 <h6 class="fw-bold mb-3">Suporte</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="support.php" class="footer-link">Central de Ajuda</a></li>
+                    <li class="mb-2"><a href="support1.php" class="footer-link">Central de Ajuda</a></li>
                     <li class="mb-2"><a href="support1.php" class="footer-link">Contato</a></li>
                     <li class="mb-2"><a href="about.php" class="footer-link">Sobre Nós</a></li>
                     <li class="mb-2"><a href="about1.php" class="footer-link">Nossa História</a></li>
@@ -451,7 +422,6 @@ requireLogin();
         </div>
     </div>
 </footer>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -525,7 +495,9 @@ requireLogin();
                     // Começar animação de digitação
                     typeWriter(bubbleDiv, message, 0);
                 } else {
-                    bubbleDiv.innerHTML = message.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    // Processar formatação: quebras de linha e negritos (** ou *)
+                    const formattedMessage = formatMessage(message);
+                    bubbleDiv.innerHTML = formattedMessage;
                     messageDiv.appendChild(bubbleDiv);
                     chatContainer.appendChild(messageDiv);
                     scrollToBottom();
@@ -533,27 +505,83 @@ requireLogin();
             }
         }
 
+        // Função para formatar mensagem (processar ** e * para negrito)
+        function formatMessage(text) {
+            // Substituir quebras de linha
+            let formatted = text.replace(/\n/g, '<br>');
+            
+            // Substituir **texto** por <strong>texto</strong>
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Substituir *texto* por <strong>texto</strong> (apenas se não foi processado antes)
+            formatted = formatted.replace(/\*([^\*]+?)\*/g, '<strong>$1</strong>');
+            
+            return formatted;
+        }
+
         function typeWriter(element, text, index) {
             // Configurações do efeito typewriter
-            const typingSpeed = 30; // Velocidade em ms (menor = mais rápido)
+            const typingSpeed = 20; // Velocidade em ms (menor = mais rápido)
             const pauseAtPunctuation = 100; // Pausa extra em pontuações
             
             if (index < text.length) {
                 const currentChar = text.charAt(index);
                 
-                // Remover cursor temporário e adicionar caractere
+                // Remover cursor temporário
                 let currentText = element.innerHTML.replace('<span class="typing-cursor">|</span>', '');
+                
+                // Processar formatação especial (**, *, <br>)
+                if (currentChar === '*') {
+                    // Verificar se é ** (negrito duplo)
+                    if (text.charAt(index + 1) === '*') {
+                        // É ** - encontrar o próximo **
+                        const endIndex = text.indexOf('**', index + 2);
+                        if (endIndex !== -1 && endIndex !== index) {
+                            const boldText = text.substring(index + 2, endIndex);
+                            currentText += '<strong>' + boldText + '</strong>';
+                            element.innerHTML = currentText + '<span class="typing-cursor">|</span>';
+                            
+                            // Pular para depois do ** final
+                            setTimeout(() => typeWriter(element, text, endIndex + 2), 10);
+                            return;
+                        }
+                    }
+                    // Se não encontrou par de **, verificar * simples
+                    else {
+                        // É * simples - encontrar o próximo * (mas não **)
+                        let nextAsterisk = index + 1;
+                        while (nextAsterisk < text.length) {
+                            if (text.charAt(nextAsterisk) === '*') {
+                                // Verificar se não é **
+                                if (text.charAt(nextAsterisk + 1) !== '*' && 
+                                    (nextAsterisk === 0 || text.charAt(nextAsterisk - 1) !== '*')) {
+                                    const boldText = text.substring(index + 1, nextAsterisk);
+                                    currentText += '<strong>' + boldText + '</strong>';
+                                    element.innerHTML = currentText + '<span class="typing-cursor">|</span>';
+                                    setTimeout(() => typeWriter(element, text, nextAsterisk + 1), 10);
+                                    return;
+                                }
+                            }
+                            nextAsterisk++;
+                        }
+                    }
+                }
+                
+                // Processar quebra de linha
+                if (currentChar === '\n') {
+                    currentText += '<br>';
+                    element.innerHTML = currentText + '<span class="typing-cursor">|</span>';
+                    setTimeout(() => typeWriter(element, text, index + 1), 10);
+                    return;
+                }
                 
                 // Processar HTML tags para não quebrar a formatação
                 if (currentChar === '<') {
-                    // Encontrar fim da tag HTML
                     const tagEnd = text.indexOf('>', index);
                     if (tagEnd !== -1) {
                         const htmlTag = text.substring(index, tagEnd + 1);
                         currentText += htmlTag;
                         element.innerHTML = currentText + '<span class="typing-cursor">|</span>';
-                        
-                        // Pular para depois da tag
                         setTimeout(() => typeWriter(element, text, tagEnd + 1), 10);
                         return;
                     }
@@ -631,15 +659,44 @@ requireLogin();
         }
 
         function showTyping() {
-            document.getElementById('typingIndicator').style.display = 'block';
             const chatContainer = document.getElementById('chatContainer');
+            
+            // Criar elemento de typing indicator dentro do chat
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingMessage';
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            bubbleDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(138, 43, 226, 0.2); display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-robot text-purple"></i>
+                        </div>
+                    </div>
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            
+            typingDiv.appendChild(bubbleDiv);
+            chatContainer.appendChild(typingDiv);
+            
             if (!userIsScrolling) {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                scrollToBottom();
             }
         }
 
         function hideTyping() {
-            document.getElementById('typingIndicator').style.display = 'none';
+            const typingMessage = document.getElementById('typingMessage');
+            if (typingMessage) {
+                typingMessage.remove();
+            }
         }
 
         function sendMessage() {
@@ -652,7 +709,7 @@ requireLogin();
             addMessage(message, true);
             messageInput.value = '';
             
-            // Show typing indicator
+            // Show typing indicator dentro do chat
             showTyping();
             
             // Send to API
@@ -673,12 +730,12 @@ requireLogin();
                     
                     // Adicionar badge da fonte
                     if (data.source === 'gemini') {
-                        response += '<br><small class="badge bg-success mt-2"><i class="bi bi-robot"></i> Gemini AI</small>';
+                        response += '<br><small class="badge bg-success mt-2"><i class="bi bi-robot"></i></small>';
                     } else if (data.source === 'local') {
                         response += '<br><small class="badge bg-secondary mt-2"><i class="bi bi-cpu"></i> Respostas Locais</small>';
                     } else if (data.source === 'fallback_gemini_error') {
                         response += '<br><small class="badge bg-warning mt-2"><i class="bi bi-exclamation-triangle"></i> Backup (Erro Gemini)</small>';
-                        console.warn('Erro no Gemini:', data.error_msg);
+                        console.warn('Erro na IA:', data.error_msg);
                     } else {
                         response += '<br><small class="badge bg-danger mt-2"><i class="bi bi-x-circle"></i> Sistema de Backup</small>';
                     }
@@ -686,7 +743,7 @@ requireLogin();
                     // Usar efeito typewriter para mensagens do bot
                     addMessage(response, false, true);
                 } else {
-                    addMessage('Desculpe, ocorreu um erro. Tente novamente em alguns instantes.', false, true);
+                    addMessage('Desculpe, ocorreu um erro. Tente novamente em alguns instantes, ou digite uma pergunta relacionada aos temas.', false, true);
                 }
             })
             .catch(error => {
@@ -712,8 +769,28 @@ requireLogin();
             chatContainer.innerHTML = `
                 <div class="message bot">
                     <div class="message-bubble">
-                        <strong>🤖 Assistente Financeiro</strong><br>
-                        Chat limpo! Como posso te ajudar hoje?
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, var(--primary-purple), var(--accent-purple)); display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-robot text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <strong>Assistente Financeiro IA</strong>
+                                <br><small class="text-muted">Especialista em Finanças Pessoais</small>
+                            </div>
+                        </div>
+                        <p class="mb-3">Olá! Sou seu consultor financeiro pessoal com IA. Posso te ajudar com:</p>
+                        <ul class="mb-0">
+                            <li>Planejamento financeiro personalizado</li>
+                            <li>Estratégias de investimento</li>
+                            <li>Análise de orçamento e gastos</li>
+                            <li>Dicas para economia e poupança</li>
+                            <li>Educação financeira avançada</li>
+                        </ul>
+                        <div class="mt-3 p-3" style="background: rgba(138, 43, 226, 0.1); border-radius: 0.5rem;">
+                            <small><i class="bi bi-info-circle me-2"></i>As respostas nem sempre são 100% precisas, procure fontes para confirma-las</small>
+                        </div>
                     </div>
                 </div>
                 <div class="scroll-indicator" id="scrollIndicator" onclick="scrollToBottom()">

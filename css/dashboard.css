@@ -1,0 +1,121 @@
+/**
+ * ========================================
+ * ESTILOS ESPECÍFICOS DO DASHBOARD
+ * ========================================
+ * Estilos customizados para a página de dashboard
+ * Inclui: transações, metas, despesas fixas, gráficos
+ */
+
+/* ============================================ */
+/* ELEMENTOS GERAIS */
+/* ============================================ */
+
+.opcoes {
+    background-color: rgba(26, 26, 46, 0.95);
+    color: white;
+}
+
+.opc {
+    color: white;
+    background-color: rgba(26, 26, 46, 0.95);
+}
+
+img {
+    loading: lazy;
+}
+
+#transr {
+    margin: 15px;
+}
+
+/* ============================================ */
+/* BARRAS DE PROGRESSO */
+/* ============================================ */
+
+.progress {
+    height: 20px;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* ============================================ */
+/* BOTÕES E AÇÕES */
+/* ============================================ */
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* ============================================ */
+/* ITENS DE DESPESA */
+/* ============================================ */
+
+.expense-item {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.expense-item:last-child {
+    border-bottom: none;
+}
+
+/* ============================================ */
+/* SEÇÃO DE ORÇAMENTO */
+/* ============================================ */
+
+.budget-section .card-body {
+    padding: 2rem;
+}
+
+.budget-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.budget-item:last-child {
+    border-bottom: none;
+}
+
+/* ============================================ */
+/* GRÁFICOS E ESTATÍSTICAS */
+/* ============================================ */
+
+/* Animação suave nos stats */
+#balance_start, #balance_current, #balance_variation, #balance_growth {
+    transition: all 0.5s ease;
+}
+
+/* Loading state para o gráfico */
+#balanceChart {
+    transition: opacity 0.3s ease;
+}
+
+/* Efeito hover nos botões de período */
+button[id^="btn-"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================ */
+/* RESPONSIVIDADE */
+/* ============================================ */
+
+@media (max-width: 768px) {
+    .d-flex.gap-2 {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    button[id^="btn-"] {
+        width: 100%;
+    }
+}

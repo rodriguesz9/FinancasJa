@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(C:xamppphpphp.exe -l investments.php)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

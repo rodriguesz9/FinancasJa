@@ -374,7 +374,7 @@ session_start();
             <div class="col-lg-2">
                 <h6 class="fw-bold mb-3">Suporte</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="support.php" class="footer-link">Central de Ajuda</a></li>
+                    <li class="mb-2"><a href="support1.php" class="footer-link">Central de Ajuda</a></li>
                     <li class="mb-2"><a href="support1.php" class="footer-link">Contato</a></li>
                     <li class="mb-2"><a href="about.php" class="footer-link">Sobre Nós</a></li>
                     <li class="mb-2"><a href="about1.php" class="footer-link">Nossa História</a></li>

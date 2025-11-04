@@ -88,7 +88,7 @@ $user_name = $_SESSION['user_name'];
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="about.php"><i class="bi bi-info-circle me-2"></i>Sobre</a></li>
                             <li><a class="dropdown-item active" href="plans.php"><i class="bi bi-star me-2"></i>Planos</a></li>
-                            <li><a class="dropdown-item" href="support.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
+                            <li><a class="dropdown-item" href="support1.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -641,7 +641,7 @@ $user_name = $_SESSION['user_name'];
             <div class="col-lg-2">
                 <h6 class="fw-bold mb-3">Suporte</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="support.php" class="footer-link">Central de Ajuda</a></li>
+                    <li class="mb-2"><a href="support1.php" class="footer-link">Central de Ajuda</a></li>
                     <li class="mb-2"><a href="support1.php" class="footer-link">Contato</a></li>
                     <li class="mb-2"><a href="about.php" class="footer-link">Sobre Nós</a></li>
                     <li class="mb-2"><a href="about1.php" class="footer-link">Nossa História</a></li>

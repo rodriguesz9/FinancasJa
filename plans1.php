@@ -88,7 +88,7 @@ $user_name = $is_logged_in ? $_SESSION['user_name'] : '';
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="about.php"><i class="bi bi-info-circle me-2"></i>Sobre</a></li>
                             <li><a class="dropdown-item active" href="plans.php"><i class="bi bi-star me-2"></i>Planos</a></li>
-                            <li><a class="dropdown-item" href="support.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
+                            <li><a class="dropdown-item" href="support1.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -234,7 +234,7 @@ $user_name = $is_logged_in ? $_SESSION['user_name'] : '';
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="about.php" class="footer-link">Sobre</a></li>
                         <li class="mb-2"><a href="plans.php" class="footer-link">Planos</a></li>
-                        <li class="mb-2"><a href="support.php" class="footer-link">Suporte</a></li>
+                        <li class="mb-2"><a href="support1.php" class="footer-link">Suporte</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2">

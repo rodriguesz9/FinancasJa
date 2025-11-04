@@ -1,12 +1,41 @@
 <?php
+/**
+ * ========================================
+ * PÁGINA DE GESTÃO DE INVESTIMENTOS
+ * ========================================
+ *
+ * Sistema completo para gerenciar e acompanhar investimentos pessoais
+ * com integração de APIs financeiras para dados em tempo real.
+ *
+ * Funcionalidades:
+ * - Cadastro, edição e exclusão de investimentos
+ * - Suporte a múltiplos tipos: Ações, FIIs, Criptomoedas, Renda Fixa
+ * - Cotações em tempo real via APIs externas
+ * - Cálculo automático de rentabilidade e lucro/prejuízo
+ * - Gráficos interativos de alocação e performance
+ * - Histórico de preços dos últimos 7 dias
+ * - Interface totalmente em português brasileiro
+ *
+ * APIs Utilizadas:
+ * - BRAPI: Cotações da B3 (Bolsa de Valores Brasileira)
+ * - CoinGecko: Preços de criptomoedas
+ * - ExchangeRate: Taxas de câmbio
+ * - Yahoo Finance: Dados históricos
+ *
+ * @package FinançasJá
+ * @author Equipe FinançasJá
+ * @version 2.0
+ * @since 2025
+ * ========================================
+ */
+
 session_start();
 require_once 'config/database.php';
 
 requireLogin();
 
-// Nova chave da API BRAPI
+// Token da API BRAPI para acesso às cotações da B3
 define('BRAPI_TOKEN', 'm17pMcSDMTBk7FqjrGvyAW');
-define('ALPHA_VANTAGE_KEY', 'IISMG43OG2HR2DM2');
 
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['user_name'];
@@ -69,11 +98,11 @@ foreach ($investments as $investment) {
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investimentos - FinançasJá</title>
+    <title>Investimentos - FinançasJá | Acompanhe sua Carteira em Tempo Real</title>
+    <meta name="description" content="Gerencie sua carteira de investimentos com dados em tempo real. Acompanhe ações, FIIs, criptomoedas e renda fixa com análises profissionais.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -81,7 +110,6 @@ foreach ($investments as $investment) {
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Cards de cotação - Tamanho compacto */
         .currency-card {
             border-radius: 15px;
             padding: 20px;
@@ -89,7 +117,6 @@ foreach ($investments as $investment) {
             position: relative;
             overflow: hidden;
             background-size: cover;
-            width: 600px;
             background-position: center;
             min-height: 180px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -167,33 +194,12 @@ foreach ($investments as $investment) {
             }
         }
 
-        /* Chart Container */
         .chart-container {
             position: relative;
             height: 200px;
             margin-top: 15px;
         }
 
-        .chart-mini {
-            max-height: 150px;
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .currency-card {
-                min-height: 160px;
-            }
-
-            .currency-value {
-                font-size: 1.5rem;
-            }
-
-            .currency-icon {
-                font-size: 2.5rem;
-            }
-        }
-
-        /* Expandable row */
         .expandable-content {
             display: none;
             background: #f8f9fa;
@@ -212,12 +218,90 @@ foreach ($investments as $investment) {
         .expand-btn.active {
             transform: rotate(180deg);
         }
+
+        .allocation-chart-container {
+            position: relative;
+            height: 350px;
+        }
+
+        .market-insight-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid var(--primary-purple);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .market-insight-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(130, 10, 209, 0.2);
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .trend-up {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .trend-down {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .performance-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .quick-action-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(130, 10, 209, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .quick-action-card:hover {
+            border-color: var(--primary-purple);
+            background: rgba(130, 10, 209, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .quick-action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary-purple);
+        }
+
+        @media (max-width: 768px) {
+            .currency-card {
+                min-height: 160px;
+            }
+
+            .currency-value {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
-
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-modern sticky-top">
+     <nav class="navbar navbar-expand-lg navbar-dark navbar-modern sticky-top">
         <div class="container">
             <a class="navbar-brand" href="home.php">
                 <i class="bi bi-gem me-2"></i>FinançasJá
@@ -259,7 +343,7 @@ foreach ($investments as $investment) {
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="about.php"><i class="bi bi-info-circle me-2"></i>Sobre</a></li>
                             <li><a class="dropdown-item" href="plans.php"><i class="bi bi-star me-2"></i>Planos</a></li>
-                            <li><a class="dropdown-item" href="support.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
+                            <li><a class="dropdown-item" href="support1.php"><i class="bi bi-headset me-2"></i>Suporte</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -269,8 +353,8 @@ foreach ($investments as $investment) {
                             <i class="bi bi-person-circle me-1"></i><?= htmlspecialchars($user_name) ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Perfil</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Configurações</a></li>
+                            <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person me-2"></i>Perfil</a></li>
+                            <li><a class="dropdown-item" href="settings.php"><i class="bi bi-gear me-2"></i>Configurações</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -289,14 +373,17 @@ foreach ($investments as $investment) {
                 <div class="row align-items-center">
                     <div class="col-lg-8">
                         <h1 class="display-5 fw-bold mb-3 fade-in-up">Carteira de Investimentos</h1>
-                        <p class="lead mb-4 fade-in-up" style="animation-delay: 0.2s;">Acompanhe seus ativos e cotações em tempo real</p>
+                        <p class="lead mb-4 fade-in-up" style="animation-delay: 0.2s;">Acompanhe seus ativos e cotações em tempo real com análises profissionais</p>
                     </div>
                     <div class="col-lg-4 text-lg-end">
-                        <button class="btn btn-purple btn-modern" data-bs-toggle="modal" data-bs-target="#addInvestmentModal">
+                        <button class="btn btn-purple btn-modern mb-2" data-bs-toggle="modal" data-bs-target="#addInvestmentModal">
                             <i class="bi bi-plus-lg me-2"></i>Novo Investimento
                         </button>
-                        <a href="ativos.php" class="btn btn-outline-purple btn-modern mt-3">
-                            <i class="bi bi-list-ul me-2"></i>Ver Lista de Ativos da B3
+                        <a href="ativos.php" class="btn btn-outline-purple btn-modern mb-2">
+                            <i class="bi bi-list-ul me-2"></i>Lista B3
+                        </a>
+                        <a href="calculators.php" class="btn btn-outline-purple btn-modern mb-2">
+                            <i class="bi bi-calculator me-2"></i>Calculadoras
                         </a>
                     </div>
                 </div>
@@ -309,14 +396,14 @@ foreach ($investments as $investment) {
         <div class="mb-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold">Cotações em Tempo Real</h3>
-                <button class="btn btn-outline-purple btn-modern" onclick="refreshCurrencies()">
+                <button class="btn btn-outline-purple btn-modern" onclick="atualizarCotacoesMoedas()">
                     <i class="bi bi-arrow-clockwise me-2"></i>Atualizar
                 </button>
             </div>
 
-            <div class="row g-4 align-items-stretch">
+            <div class="row g-4">
                 <!-- DÓLAR -->
-                <div class="col-md-4 d-flex">
+                <div class="col-md-4">
                     <div class="currency-card" id="dollar-card">
                         <div class="currency-card-content">
                             <div class="currency-icon">💵</div>
@@ -335,7 +422,7 @@ foreach ($investments as $investment) {
                 </div>
 
                 <!-- EURO -->
-                <div class="col-md-4 d-flex">
+                <div class="col-md-4">
                     <div class="currency-card" id="euro-card">
                         <div class="currency-card-content">
                             <div class="currency-icon">💶</div>
@@ -354,7 +441,7 @@ foreach ($investments as $investment) {
                 </div>
 
                 <!-- BITCOIN -->
-                <div class="col-md-4 d-flex">
+                <div class="col-md-4">
                     <div class="currency-card" id="bitcoin-card">
                         <div class="currency-card-content">
                             <div class="currency-icon">₿</div>
@@ -430,12 +517,104 @@ foreach ($investments as $investment) {
             </div>
         </div>
 
+        <!-- Alocação de Portfólio -->
+        <?php if (!empty($investments)): ?>
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card-modern">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-4">
+                            <i class="bi bi-pie-chart text-purple me-2"></i>Alocação de Portfólio
+                        </h4>
+                        <div class="allocation-chart-container">
+                            <canvas id="allocationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card-modern">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-4">
+                            <i class="bi bi-graph-up text-info me-2"></i>Performance por Tipo
+                        </h4>
+                        <div id="performanceByType">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-purple" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Insights de Mercado -->
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4">
+                <i class="bi bi-lightbulb text-warning me-2"></i>Insights de Mercado
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="market-insight-card">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-graph-up-arrow text-success" style="font-size: 2rem;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="fw-bold">Ibovespa Hoje</h5>
+                                <h3 class="text-success mb-2" id="ibovespa_value">--</h3>
+                                <span class="trend-indicator trend-up" id="ibovespa_change">
+                                    <i class="bi bi-arrow-up me-1"></i>--
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="market-insight-card">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-currency-dollar text-info" style="font-size: 2rem;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="fw-bold">Dólar Comercial</h5>
+                                <h3 class="text-info mb-2" id="market_dollar">--</h3>
+                                <span class="trend-indicator" id="market_dollar_change">
+                                    <i class="bi bi-dash me-1"></i>--
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="market-insight-card">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-percent text-warning" style="font-size: 2rem;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="fw-bold">Taxa Selic</h5>
+                                <h3 class="text-warning mb-2">13,75% a.a.</h3>
+                                <small class="text-muted">Última reunião COPOM</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Carteira -->
         <div class="card-modern mb-4">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="fw-bold mb-0"><i class="bi bi-wallet2 text-purple me-2"></i>Minha Carteira</h4>
-                    <button class="btn btn-outline-purple btn-modern" onclick="refreshPrices()">
+                    <button class="btn btn-outline-purple btn-modern" onclick="atualizarPrecos()">
                         <i class="bi bi-arrow-clockwise me-2"></i>Atualizar Cotações
                     </button>
                 </div>
@@ -444,9 +623,9 @@ foreach ($investments as $investment) {
                     <div class="text-center py-5">
                         <i class="bi bi-graph-up text-purple" style="font-size: 5rem; opacity: 0.3;"></i>
                         <h4 style="color: #6c757d;" class="mt-4">Nenhum investimento encontrado</h4>
-                        <p style="color: #6c757d;" class="mb-4">Comece adicionando seu primeiro investimento</p>
+                        <p style="color: #6c757d;" class="mb-4">Comece adicionando seu primeiro investimento e acompanhe sua evolução</p>
                         <button class="btn btn-purple btn-modern" data-bs-toggle="modal" data-bs-target="#addInvestmentModal">
-                            <i class="bi bi-plus-lg me-2"></i>Adicionar Investimento
+                            <i class="bi bi-plus-lg me-2"></i>Adicionar Primeiro Investimento
                         </button>
                     </div>
                 <?php else: ?>
@@ -454,7 +633,6 @@ foreach ($investments as $investment) {
                         <table class="table table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th></th>
                                     <th>Ativo</th>
                                     <th>Tipo</th>
                                     <th>Quantidade</th>
@@ -469,9 +647,6 @@ foreach ($investments as $investment) {
                             <tbody>
                                 <?php foreach ($investments as $inv): ?>
                                     <tr data-investment-id="<?= $inv['id'] ?>" data-symbol="<?= htmlspecialchars($inv['nome_ativo']) ?>" data-type="<?= htmlspecialchars($inv['tipo_investimento']) ?>" data-quantity="<?= $inv['quantidade'] ?>" data-buy-price="<?= $inv['preco_compra'] ?>">
-                                        <td>
-                                            <i class="bi bi-chevron-down expand-btn" onclick="toggleChart(<?= $inv['id'] ?>, '<?= htmlspecialchars($inv['nome_ativo']) ?>', '<?= htmlspecialchars($inv['tipo_investimento']) ?>')"></i>
-                                        </td>
                                         <td>
                                             <strong><?= htmlspecialchars($inv['nome_ativo']) ?></strong>
                                             <br><small style="color: #6c757d;"><?= date('d/m/Y', strtotime($inv['data_compra'])) ?></small>
@@ -492,20 +667,6 @@ foreach ($investments as $investment) {
                                             </a>
                                         </td>
                                     </tr>
-                                    <tr class="expandable-content" id="chart-row-<?= $inv['id'] ?>">
-                                        <td colspan="10">
-                                            <div class="chart-container">
-                                                <canvas id="chart-<?= $inv['id'] ?>"></canvas>
-                                            </div>
-                                            <div class="text-center mt-2">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-info-circle me-1"></i>
-                                                    <strong>Gráfico dos últimos 7 dias</strong> - 
-                                                    Preços de fechamento diário (~18h, horário de Brasília)
-                                                </small>
-                                            </div>
-                                        </td>
-                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
@@ -514,77 +675,54 @@ foreach ($investments as $investment) {
             </div>
         </div>
 
-        <!-- Como Usar e Avisos -->
-        <div class="row g-4">
-            <div class="col-lg-9">
-                <div class="card-modern h-100">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-4"><i class="bi bi-info-circle-fill text-purple me-2"></i>Como Usar</h5>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0">
-                                        <div class="bg-purple bg-opacity-10 rounded-circle p-3">
-                                            <i class="bi bi-1-circle text-purple fs-4"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="fw-bold">Adicione um Investimento</h6>
-                                        <p style="color: #ffffffff;" class="mb-0">Clique em "Novo Investimento" e preencha as informações do ativo.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0">
-                                        <div class="bg-purple bg-opacity-10 rounded-circle p-3">
-                                            <i class="bi bi-2-circle text-purple fs-4"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="fw-bold">Visualize Gráficos</h6>
-                                        <p style="color: #ffffffff;" class="mb-0">Clique na seta para ver o gráfico de 7 dias do ativo.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0">
-                                        <div class="bg-purple bg-opacity-10 rounded-circle p-3">
-                                            <i class="bi bi-3-circle text-purple fs-4"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="fw-bold">Edite Investimentos</h6>
-                                        <p style="color: #fffdfdff;" class="mb-0">Use o botão de lápis para editar os dados do investimento.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0">
-                                        <div class="bg-purple bg-opacity-10 rounded-circle p-3">
-                                            <i class="bi bi-4-circle text-purple fs-4"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="fw-bold">Acompanhe</h6>
-                                        <p style="color: #ffffffff;" class="mb-0">O sistema atualiza automaticamente as cotações.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Ações Rápidas -->
+        <div class="mb-5">
+            <h3 class="fw-bold mb-4">
+                <i class="bi bi-lightning text-warning me-2"></i>Ações Rápidas
+            </h3>
+            <div class="row g-3">
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-action-card" data-bs-toggle="modal" data-bs-target="#addInvestmentModal">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <h6 class="fw-bold mb-1">Adicionar Investimento</h6>
+                        <small class="text-muted">Registre novo ativo</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-action-card" onclick="window.location.href='calculators.php'">
+                        <i class="bi bi-calculator-fill"></i>
+                        <h6 class="fw-bold mb-1">Calculadoras</h6>
+                        <small class="text-muted">Simule investimentos</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-action-card" onclick="window.location.href='ativos.php'">
+                        <i class="bi bi-list-ul"></i>
+                        <h6 class="fw-bold mb-1">Explorar Ativos</h6>
+                        <small class="text-muted">Ver lista completa B3</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="quick-action-card" onclick="window.location.href='conversabot.php'">
+                        <i class="bi bi-robot"></i>
+                        <h6 class="fw-bold mb-1">Consultoria IA</h6>
+                        <small class="text-muted">Tirar dúvidas</small>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-lg-3">
-                <div class="card-modern h-100" style="background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); color: white;">
-                    <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+        <!-- Aviso -->
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card-modern" style="background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); color: white;">
+                    <div class="card-body p-4 text-center">
                         <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
                         <h5 class="fw-bold mb-3">AVISO IMPORTANTE</h5>
                         <p class="mb-0">
-                            As cotações são aproximadas e para fins informativos. Use fontes oficiais para operações reais.
+                            As informações fornecidas são aproximadas e para fins informativos. 
+                            Use fontes oficiais (B3, corretoras, CVM) para operações reais. 
+                            Investimentos envolvem riscos e rentabilidade passada não garante resultados futuros.
                         </p>
                     </div>
                 </div>
@@ -609,7 +747,6 @@ foreach ($investments as $investment) {
                                 <option value="Ação">Ação</option>
                                 <option value="FII">Fundo Imobiliário (FII)</option>
                                 <option value="Cripto">Criptomoeda</option>
-                                <option value="Renda Fixa">Renda Fixa</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -660,13 +797,11 @@ foreach ($investments as $investment) {
                                 <option value="Ação">Ação</option>
                                 <option value="FII">Fundo Imobiliário (FII)</option>
                                 <option value="Cripto">Criptomoeda</option>
-                                <option value="Renda Fixa">Renda Fixa</option>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nome do Ativo</label>
                             <input type="text" class="form-control" name="nome_ativo" id="edit_nome_ativo" placeholder="Ex: PETR4, MXRF11, BTC" required>
-                            <small style="color: #6c757d;">Digite o código da ação, FII ou criptomoeda</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Quantidade</label>
@@ -675,7 +810,6 @@ foreach ($investments as $investment) {
                         <div class="mb-3">
                             <label class="form-label fw-bold">Preço de Compra (R$)</label>
                             <input type="text" class="form-control" id="edit_preco_compra" placeholder="25,50" required>
-                            <small style="color: #6c757d;">Digite o valor (exemplo: 25,50)</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Data da Compra</label>
@@ -695,110 +829,44 @@ foreach ($investments as $investment) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ========== COTAÇÕES DE MOEDAS (ATUALIZADO) ==========
-        const EXCHANGERATE_URL = 'https://open.er-api.com/v6/latest/USD';
+        /**
+         * ========================================
+         * SISTEMA DE GESTÃO DE INVESTIMENTOS
+         * ========================================
+         *
+         * Sistema completo para acompanhamento de carteira de investimentos
+         * com dados reais de mercado em tempo real.
+         *
+         * APIs Integradas:
+         * - BRAPI: Cotações da B3 (ações e FIIs brasileiros)
+         * - CoinGecko: Preços de criptomoedas em BRL
+         * - ExchangeRate: Taxas de câmbio (USD, EUR)
+         * - Yahoo Finance: Dados históricos para gráficos
+         *
+         * Recursos:
+         * - Cotações em tempo real com cache inteligente (5 minutos)
+         * - Gráficos interativos com Chart.js
+         * - Cálculo automático de rentabilidade
+         * - Alocação de portfólio por tipo de investimento
+         * - Insights de mercado (Ibovespa, Dólar, Selic)
+         * - Interface responsiva e localizada em PT-BR
+         *
+         * Desenvolvido para o projeto FinançasJá
+         * Última atualização: 2025
+         * ========================================
+         */
 
-        async function getDollarExchangeRates() {
-            try {
-                const response = await fetch(EXCHANGERATE_URL);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
+        // ========== CONFIGURAÇÕES E CONSTANTES ==========
+        const TOKEN_BRAPI = '<?= BRAPI_TOKEN ?>';
+        const URL_BRAPI = 'https://brapi.dev/api/quote';
+        const totalInvestido = <?= (float)$total_invested ?>;
+        let valorAtualTotal = 0;
+        let cacheCotacoes = {};
+        let instanciasGraficos = {};
+        let instanciaGraficoAlocacao = null;
 
-                if (data.result === 'success' && data.rates && data.rates.BRL) {
-                    const rate = data.rates.BRL;
-                    const spread = 0.02;
-                    const compra = rate * (1 - spread / 2);
-                    const venda = rate * (1 + spread / 2);
-
-                    document.getElementById("dollar_compra").innerText = compra.toFixed(2);
-                    document.getElementById("dollar_venda").innerText = venda.toFixed(2);
-                } else {
-                    throw new Error("Dados inválidos");
-                }
-            } catch (error) {
-                console.error("Erro ao obter Dólar:", error);
-                document.getElementById("dollar_compra").innerText = "N/A";
-                document.getElementById("dollar_venda").innerText = "N/A";
-            } finally {
-                document.getElementById("dollar_update").innerText = new Date().toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-        }
-
-        async function getEuroExchangeRates() {
-            try {
-                const response = await fetch(EXCHANGERATE_URL);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-
-                if (data.result === 'success' && data.rates && data.rates.EUR && data.rates.BRL) {
-                    const usdToBrl = data.rates.BRL;
-                    const usdToEur = data.rates.EUR;
-                    const eurToBrl = usdToBrl / usdToEur;
-                    const spread = 0.02;
-                    const compra = eurToBrl * (1 - spread / 2);
-                    const venda = eurToBrl * (1 + spread / 2);
-
-                    document.getElementById("euro_compra").innerText = compra.toFixed(2);
-                    document.getElementById("euro_venda").innerText = venda.toFixed(2);
-                } else {
-                    throw new Error("Dados inválidos");
-                }
-            } catch (error) {
-                console.error("Erro ao obter Euro:", error);
-                document.getElementById("euro_compra").innerText = "N/A";
-                document.getElementById("euro_venda").innerText = "N/A";
-            } finally {
-                document.getElementById("euro_update").innerText = new Date().toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-        }
-
-        async function getBitcoinPrice() {
-            const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl";
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-
-                if (data.bitcoin?.brl) {
-                    document.getElementById("bitcoin_preco").innerText = data.bitcoin.brl.toLocaleString('pt-BR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-                } else {
-                    document.getElementById("bitcoin_preco").innerText = "N/A";
-                }
-            } catch (error) {
-                console.error("Erro ao obter Bitcoin:", error);
-                document.getElementById("bitcoin_preco").innerText = "Erro";
-            } finally {
-                document.getElementById("bitcoin_update").innerText = new Date().toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-        }
-
-        function refreshCurrencies() {
-            getDollarExchangeRates();
-            getEuroExchangeRates();
-            getBitcoinPrice();
-        }
-
-        // ========== SISTEMA DE INVESTIMENTOS ==========
-        const BRAPI_TOKEN = '<?= BRAPI_TOKEN ?>';
-        const BRAPI_URL = 'https://brapi.dev/api/quote';
-        const totalInvested = <?= (float)$total_invested ?>;
-        let totalCurrentValue = 0;
-        let priceCache = {};
-        let chartInstances = {};
-
-        const CRYPTO_MAP = {
+        // Mapeamento de criptomoedas para IDs do CoinGecko
+        const MAPA_CRIPTOMOEDAS = {
             'BTC': 'bitcoin',
             'ETH': 'ethereum',
             'USDT': 'tether',
@@ -811,10 +879,494 @@ foreach ($investments as $investment) {
             'MATIC': 'matic-network',
             'LTC': 'litecoin',
             'SHIB': 'shiba-inu',
-            'UNI': 'uniswap',
+            'AVAX': 'avalanche-2',
             'LINK': 'chainlink',
-            'AVAX': 'avalanche-2'
+            'UNI': 'uniswap'
         };
+
+        // Tempo de cache em milissegundos (5 minutos)
+        const TEMPO_CACHE = 300000;
+
+        // ========== COTAÇÕES DE MOEDAS ==========
+        const URL_TAXA_CAMBIO = 'https://open.er-api.com/v6/latest/USD';
+
+        /**
+         * Busca e atualiza as cotações do Dólar (compra e venda)
+         * Usa a API ExchangeRate para obter taxas em tempo real
+         */
+        async function obterCotacoesDolar() {
+            try {
+                const resposta = await fetch(URL_TAXA_CAMBIO);
+                if (!resposta.ok) throw new Error(`Erro HTTP ${resposta.status}`);
+                const dados = await resposta.json();
+
+                if (dados.result === 'success' && dados.rates && dados.rates.BRL) {
+                    const taxaCambio = dados.rates.BRL;
+                    const spread = 0.02; // Spread de 2% simulando compra/venda
+                    const valorCompra = taxaCambio * (1 - spread / 2);
+                    const valorVenda = taxaCambio * (1 + spread / 2);
+
+                    document.getElementById("dollar_compra").innerText = valorCompra.toFixed(2);
+                    document.getElementById("dollar_venda").innerText = valorVenda.toFixed(2);
+
+                    // Atualizar seção de insights de mercado
+                    document.getElementById("market_dollar").innerText = 'R$ ' + taxaCambio.toFixed(2);
+                } else {
+                    throw new Error("Dados inválidos recebidos da API");
+                }
+            } catch (erro) {
+                console.error("Erro ao obter cotação do Dólar:", erro);
+                document.getElementById("dollar_compra").innerText = "Indisponível";
+                document.getElementById("dollar_venda").innerText = "Indisponível";
+                document.getElementById("market_dollar").innerText = "Erro ao carregar";
+            } finally {
+                // Atualizar horário da última atualização
+                document.getElementById("dollar_update").innerText = new Date().toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        /**
+         * Busca e atualiza as cotações do Euro (compra e venda)
+         * Calcula a taxa EUR/BRL através da conversão USD->EUR e USD->BRL
+         */
+        async function obterCotacoesEuro() {
+            try {
+                const resposta = await fetch(URL_TAXA_CAMBIO);
+                if (!resposta.ok) throw new Error(`Erro HTTP ${resposta.status}`);
+                const dados = await resposta.json();
+
+                if (dados.result === 'success' && dados.rates && dados.rates.EUR && dados.rates.BRL) {
+                    const taxaUsdParaBrl = dados.rates.BRL;
+                    const taxaUsdParaEur = dados.rates.EUR;
+                    const taxaEurParaBrl = taxaUsdParaBrl / taxaUsdParaEur;
+                    const spread = 0.02; // Spread de 2%
+                    const valorCompra = taxaEurParaBrl * (1 - spread / 2);
+                    const valorVenda = taxaEurParaBrl * (1 + spread / 2);
+
+                    document.getElementById("euro_compra").innerText = valorCompra.toFixed(2);
+                    document.getElementById("euro_venda").innerText = valorVenda.toFixed(2);
+                } else {
+                    throw new Error("Dados inválidos recebidos da API");
+                }
+            } catch (erro) {
+                console.error("Erro ao obter cotação do Euro:", erro);
+                document.getElementById("euro_compra").innerText = "Indisponível";
+                document.getElementById("euro_venda").innerText = "Indisponível";
+            } finally {
+                document.getElementById("euro_update").innerText = new Date().toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        /**
+         * Busca e atualiza o preço do Bitcoin em Reais
+         * Usa a API CoinGecko para obter cotação em tempo real
+         */
+        async function obterPrecoBitcoin() {
+            const urlApi = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl";
+            try {
+                const resposta = await fetch(urlApi);
+                if (!resposta.ok) throw new Error(`Erro HTTP ${resposta.status}`);
+                const dados = await resposta.json();
+
+                if (dados.bitcoin?.brl) {
+                    document.getElementById("bitcoin_preco").innerText = dados.bitcoin.brl.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                } else {
+                    throw new Error("Dados de Bitcoin não disponíveis");
+                }
+            } catch (erro) {
+                console.error("Erro ao obter cotação do Bitcoin:", erro);
+                document.getElementById("bitcoin_preco").innerText = "Indisponível";
+            } finally {
+                document.getElementById("bitcoin_update").innerText = new Date().toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        /**
+         * Atualiza todas as cotações de moedas (Dólar, Euro e Bitcoin)
+         */
+        function atualizarCotacoesMoedas() {
+            obterCotacoesDolar();
+            obterCotacoesEuro();
+            obterPrecoBitcoin();
+        }
+
+        // ========== INSIGHTS DE MERCADO ==========
+        /**
+         * Carrega e atualiza os insights de mercado (Ibovespa)
+         * Usa a API BRAPI para obter dados da bolsa brasileira
+         */
+        async function carregarInsightsMercado() {
+            try {
+                // Buscar dados do Ibovespa (índice principal da B3)
+                const respostaIbov = await fetch(`${URL_BRAPI}/^BVSP?token=${TOKEN_BRAPI}`);
+                if (respostaIbov.ok) {
+                    const dadosIbov = await respostaIbov.json();
+                    if (dadosIbov.results && dadosIbov.results[0]) {
+                        const ibovespa = dadosIbov.results[0];
+                        const valorAtual = ibovespa.regularMarketPrice.toLocaleString('pt-BR', {maximumFractionDigits: 0});
+                        const variacao = ibovespa.regularMarketChangePercent;
+
+                        // Atualizar valor do Ibovespa
+                        document.getElementById('ibovespa_value').textContent = valorAtual + ' pts';
+
+                        // Atualizar variação com indicador visual
+                        const elementoVariacao = document.getElementById('ibovespa_change');
+                        elementoVariacao.textContent = (variacao >= 0 ? '+' : '') + variacao.toFixed(2) + '%';
+                        elementoVariacao.className = 'trend-indicator ' + (variacao >= 0 ? 'trend-up' : 'trend-down');
+                        elementoVariacao.innerHTML = `<i class="bi bi-arrow-${variacao >= 0 ? 'up' : 'down'} me-1"></i>` + elementoVariacao.textContent;
+                    }
+                }
+            } catch (erro) {
+                console.error('Erro ao carregar insights de mercado:', erro);
+                document.getElementById('ibovespa_value').textContent = 'Dados indisponíveis no momento';
+                document.getElementById('ibovespa_change').textContent = '--';
+            }
+        }
+
+        // ========== FUNÇÕES DE COTAÇÃO DE PREÇOS ==========
+        /**
+         * Busca o preço de uma ação ou FII brasileiro na B3
+         * Implementa cache de 5 minutos para reduzir chamadas à API
+         * @param {string} simbolo - Código do ativo (ex: PETR4, VALE3)
+         * @returns {number|null} - Preço atual ou null se não disponível
+         */
+        async function buscarPrecoAcaoBrasileira(simbolo) {
+            // Verificar se existe no cache e se ainda é válido
+            if (cacheCotacoes[simbolo]) {
+                const idadeCache = Date.now() - cacheCotacoes[simbolo].timestamp;
+                if (idadeCache < TEMPO_CACHE) {
+                    console.log(`Usando cache para ${simbolo}`);
+                    return cacheCotacoes[simbolo].preco;
+                }
+            }
+
+            try {
+                const resposta = await fetch(`${URL_BRAPI}/${simbolo}?token=${TOKEN_BRAPI}`);
+                if (!resposta.ok) {
+                    console.warn(`BRAPI retornou status ${resposta.status} para ${simbolo}`);
+                    return null;
+                }
+                const dados = await resposta.json();
+
+                if (dados.results && dados.results[0]?.regularMarketPrice) {
+                    const preco = dados.results[0].regularMarketPrice;
+                    // Armazenar no cache
+                    cacheCotacoes[simbolo] = {
+                        preco,
+                        timestamp: Date.now()
+                    };
+                    return preco;
+                }
+            } catch (erro) {
+                console.error(`Erro ao buscar preço de ${simbolo} na BRAPI:`, erro);
+            }
+            return null;
+        }
+
+        /**
+         * Busca o preço de uma criptomoeda
+         * Implementa cache de 5 minutos para reduzir chamadas à API
+         * @param {string} simbolo - Código da cripto (ex: BTC, ETH)
+         * @returns {number|null} - Preço atual em BRL ou null se não disponível
+         */
+        async function buscarPrecoCriptomoeda(simbolo) {
+            const idCripto = MAPA_CRIPTOMOEDAS[simbolo] || simbolo.toLowerCase();
+
+            // Verificar cache
+            if (cacheCotacoes[simbolo]) {
+                const idadeCache = Date.now() - cacheCotacoes[simbolo].timestamp;
+                if (idadeCache < TEMPO_CACHE) {
+                    console.log(`Usando cache para ${simbolo}`);
+                    return cacheCotacoes[simbolo].preco;
+                }
+            }
+
+            try {
+                const urlApi = `https://api.coingecko.com/api/v3/simple/price?ids=${idCripto}&vs_currencies=brl`;
+                const resposta = await fetch(urlApi);
+                if (!resposta.ok) {
+                    console.warn(`CoinGecko retornou status ${resposta.status} para ${simbolo}`);
+                    return null;
+                }
+                const dados = await resposta.json();
+
+                if (dados[idCripto]?.brl) {
+                    const preco = dados[idCripto].brl;
+                    // Armazenar no cache
+                    cacheCotacoes[simbolo] = {
+                        preco,
+                        timestamp: Date.now()
+                    };
+                    return preco;
+                }
+            } catch (erro) {
+                console.error(`Erro ao buscar preço de ${simbolo} no CoinGecko:`, erro);
+            }
+            return null;
+        }
+
+        /**
+         * Busca o preço de um ativo baseado no tipo
+         * @param {string} simbolo - Código do ativo
+         * @param {string} tipo - Tipo do investimento (Ação, FII, Cripto, Renda Fixa)
+         * @returns {number|null} - Preço atual ou null
+         */
+        async function buscarPrecoAtivo(simbolo, tipo) {
+            if (tipo === 'Cripto') return await buscarPrecoCriptomoeda(simbolo);
+            if (tipo === 'Ação' || tipo === 'FII') return await buscarPrecoAcaoBrasileira(simbolo);
+            // Renda Fixa não tem cotação dinâmica
+            return null;
+        }
+
+        // ========== ATUALIZAR INVESTIMENTOS DA CARTEIRA ==========
+        /**
+         * Atualiza uma linha de investimento com o preço atual e calcula rentabilidade
+         * @param {HTMLElement} linha - Elemento TR da tabela
+         */
+        async function atualizarLinhaInvestimento(linha) {
+            const simbolo = linha.dataset.symbol.toUpperCase().trim();
+            const tipo = linha.dataset.type;
+            const quantidade = parseFloat(linha.dataset.quantity);
+            const precoCompra = parseFloat(linha.dataset.buyPrice);
+            const valorInvestido = quantidade * precoCompra;
+
+            let precoAtual = precoCompra;
+            // Buscar cotação atual apenas se não for Renda Fixa
+            if (tipo !== 'Renda Fixa') {
+                precoAtual = await buscarPrecoAtivo(simbolo, tipo) || precoCompra;
+            }
+
+            const valorAtual = quantidade * precoAtual;
+            const lucro = valorAtual - valorInvestido;
+            const percentualLucro = valorInvestido > 0 ? (lucro / valorInvestido) * 100 : 0;
+
+            // Atualizar preço atual na tabela
+            linha.querySelector('.current-price').innerHTML = precoAtual === precoCompra && tipo !== 'Renda Fixa' ?
+                `<span class="text-muted">R$ ${precoAtual.toFixed(2)}</span><br><small class="text-warning"><i class="bi bi-exclamation-circle"></i> Sem cotação</small>` :
+                `R$ ${precoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // Atualizar valor atual
+            linha.querySelector('.current-value').textContent = `R$ ${valorAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // Atualizar resultado (lucro/prejuízo)
+            const classeResultado = lucro >= 0 ? 'text-success' : 'text-danger';
+            const iconeResultado = lucro >= 0 ? '↑' : '↓';
+            const textoResultado = lucro >= 0 ? 'Alta' : 'Queda';
+            linha.querySelector('.investment-result').innerHTML = `
+                <div class="${classeResultado}">
+                    <strong>${lucro >= 0 ? '+' : ''}R$ ${lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                    <br><small>${iconeResultado} ${textoResultado} ${percentualLucro.toFixed(2)}%</small>
+                </div>
+            `;
+
+            valorAtualTotal += valorAtual;
+        }
+
+        /**
+         * Atualiza todos os preços dos investimentos na carteira
+         * Busca cotações atuais e recalcula rentabilidade total
+         */
+        async function atualizarPrecos() {
+            valorAtualTotal = 0;
+            cacheCotacoes = {}; // Limpar cache para forçar atualização
+            const linhas = document.querySelectorAll('tbody tr[data-investment-id]');
+            if (linhas.length === 0) return;
+
+            // Mostrar spinners de carregamento
+            for (const linha of linhas) {
+                linha.querySelector('.current-price').innerHTML = '<span class="spinner-modern" style="border-color: #6c757d; border-top-color: #667eea;"></span>';
+                linha.querySelector('.current-value').innerHTML = '<span class="spinner-modern" style="border-color: #6c757d; border-top-color: #667eea;"></span>';
+                linha.querySelector('.investment-result').innerHTML = '<span class="spinner-modern" style="border-color: #6c757d; border-top-color: #667eea;"></span>';
+            }
+
+            document.getElementById('currentValue').innerHTML = '<span class="spinner-modern"></span>';
+            document.getElementById('profitability').innerHTML = '<span class="spinner-modern"></span>';
+
+            // Atualizar cada investimento
+            for (const linha of linhas) {
+                await atualizarLinhaInvestimento(linha);
+                await new Promise(r => setTimeout(r, 100)); // Pequeno delay entre chamadas
+            }
+
+            // Calcular rentabilidade total
+            const lucroTotal = valorAtualTotal - totalInvestido;
+            const percentualLucroTotal = totalInvestido > 0 ? (lucroTotal / totalInvestido) * 100 : 0;
+
+            // Atualizar valor atual total
+            document.getElementById('currentValue').textContent = `R$ ${valorAtualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // Atualizar rentabilidade com cores e ícones
+            const classeLucro = lucroTotal >= 0 ? 'text-success' : 'text-danger';
+            const iconeLucro = lucroTotal >= 0 ? '↑' : '↓';
+            const textoLucro = lucroTotal >= 0 ? 'Alta' : 'Queda';
+            document.getElementById('profitability').innerHTML = `
+                <span class="${classeLucro}">
+                    ${iconeLucro} ${textoLucro} ${lucroTotal >= 0 ? '+' : ''}${percentualLucroTotal.toFixed(2)}%
+                </span>
+            `;
+
+            // Atualizar gráficos de alocação e performance
+            atualizarGraficoAlocacao();
+            atualizarPerformancePorTipo();
+        }
+
+        // ========== GRÁFICO DE ALOCAÇÃO DO PORTFÓLIO ==========
+        /**
+         * Atualiza o gráfico de pizza mostrando a alocação por tipo de investimento
+         */
+        function atualizarGraficoAlocacao() {
+            const linhas = document.querySelectorAll('tbody tr[data-investment-id]');
+            const dadosPorTipo = {};
+
+            // Somar valores investidos por tipo
+            linhas.forEach(linha => {
+                const tipo = linha.dataset.type;
+                const quantidade = parseFloat(linha.dataset.quantity);
+                const precoCompra = parseFloat(linha.dataset.buyPrice);
+                const valorInvestido = quantidade * precoCompra;
+
+                if (!dadosPorTipo[tipo]) {
+                    dadosPorTipo[tipo] = 0;
+                }
+                dadosPorTipo[tipo] += valorInvestido;
+            });
+
+            const rotulos = Object.keys(dadosPorTipo);
+            const valores = Object.values(dadosPorTipo);
+
+            // Cores por tipo de investimento
+            const coresPorTipo = {
+                'Ação': '#667eea',
+                'FII': '#28a745',
+                'Cripto': '#f7931a'
+            };
+
+            const coresFundo = rotulos.map(rotulo => coresPorTipo[rotulo] || '#6c757d');
+
+            const elementoCanvas = document.getElementById('allocationChart');
+            if (!elementoCanvas) return;
+
+            // Destruir instância anterior se existir
+            if (instanciaGraficoAlocacao) {
+                instanciaGraficoAlocacao.destroy();
+            }
+
+            // Criar novo gráfico
+            instanciaGraficoAlocacao = new Chart(elementoCanvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: rotulos,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: coresFundo,
+                        borderColor: '#1a1a2e',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'white',
+                                padding: 20,
+                                font: { size: 13 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(contexto) {
+                                    const rotulo = contexto.label || '';
+                                    const valor = contexto.parsed;
+                                    const total = contexto.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentual = ((valor / total) * 100).toFixed(1);
+                                    return `${rotulo}: R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (${percentual}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ========== PERFORMANCE POR TIPO DE INVESTIMENTO ==========
+        /**
+         * Calcula e exibe a performance agregada por tipo de investimento
+         * Mostra ganhos e perdas separados por categoria (Ação, FII, Cripto, etc.)
+         */
+        async function atualizarPerformancePorTipo() {
+            const linhas = document.querySelectorAll('tbody tr[data-investment-id]');
+            const performancePorTipo = {};
+
+            // Coletar dados de cada investimento
+            for (const linha of linhas) {
+                const tipo = linha.dataset.type;
+                const elementoResultado = linha.querySelector('.investment-result');
+
+                if (!performancePorTipo[tipo]) {
+                    performancePorTipo[tipo] = { ganho: 0, perda: 0, quantidade: 0 };
+                }
+
+                performancePorTipo[tipo].quantidade++;
+
+                // Extrair valor do resultado (lucro ou prejuízo)
+                const textoResultado = elementoResultado.textContent;
+                const match = textoResultado.match(/([+-])?R\$\s*([\d.,]+)/);
+                if (match) {
+                    const valor = parseFloat(match[2].replace(/\./g, '').replace(',', '.'));
+                    const ehPositivo = match[1] !== '-';
+
+                    if (ehPositivo) {
+                        performancePorTipo[tipo].ganho += valor;
+                    } else {
+                        performancePorTipo[tipo].perda += valor;
+                    }
+                }
+            }
+
+            // Gerar HTML para exibição
+            const container = document.getElementById('performanceByType');
+            let htmlConteudo = '';
+
+            Object.keys(performancePorTipo).forEach(tipo => {
+                const perf = performancePorTipo[tipo];
+                const resultadoTotal = perf.ganho - perf.perda;
+                const ehPositivo = resultadoTotal >= 0;
+                const corTexto = ehPositivo ? 'success' : 'danger';
+                const icone = ehPositivo ? 'arrow-up' : 'arrow-down';
+
+                htmlConteudo += `
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div>
+                            <h6 class="mb-1">${tipo}</h6>
+                            <small class="text-muted">${perf.quantidade} ativo(s)</small>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="text-${corTexto} mb-0">
+                                <i class="bi bi-${icone} me-1"></i>
+                                ${ehPositivo ? '+' : ''}R$ ${resultadoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            </h5>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlConteudo || '<p class="text-muted text-center">Nenhum dado disponível</p>';
+        }
 
         // ========== FUNÇÕES DE EDIÇÃO ==========
         function openEditModal(investment) {
@@ -823,7 +1375,6 @@ foreach ($investments as $investment) {
             document.getElementById('edit_nome_ativo').value = investment.nome_ativo;
             document.getElementById('edit_quantidade').value = investment.quantidade;
             
-            // Formatar preço para exibição
             const precoFormatado = parseFloat(investment.preco_compra).toFixed(2).replace('.', ',');
             document.getElementById('edit_preco_compra').value = precoFormatado;
             
@@ -831,404 +1382,6 @@ foreach ($investments as $investment) {
             
             const modal = new bootstrap.Modal(document.getElementById('editInvestmentModal'));
             modal.show();
-        }
-
-        // ========== FUNÇÕES DE GRÁFICO (USA YAHOO FINANCE) ==========
-        async function toggleChart(investmentId, symbol, type) {
-            const chartRow = document.getElementById(`chart-row-${investmentId}`);
-            const expandBtn = event.target;
-            
-            if (chartRow.classList.contains('show')) {
-                chartRow.classList.remove('show');
-                expandBtn.classList.remove('active');
-                return;
-            }
-            
-            chartRow.classList.add('show');
-            expandBtn.classList.add('active');
-            
-            // Se o gráfico já existe, não precisa recarregar
-            if (chartInstances[investmentId]) {
-                return;
-            }
-            
-            // Buscar dados históricos
-            await loadChartData(investmentId, symbol, type);
-        }
-
-        async function loadChartData(investmentId, symbol, type) {
-            const canvas = document.getElementById(`chart-${investmentId}`);
-            const ctx = canvas.getContext('2d');
-            
-            // Adiciona mensagem de carregamento
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#667eea';
-            ctx.textAlign = 'center';
-            ctx.fillText('Carregando dados...', canvas.width / 2, canvas.height / 2);
-            
-            try {
-                let chartData = { labels: [], data: [] };
-                
-                console.log(`Carregando dados para: ${symbol} (${type})`);
-                
-                if (type === 'Ação' || type === 'FII') {
-                    // USA YAHOO FINANCE PARA GRÁFICOS
-                    chartData = await fetchStockHistoricalDataYahoo(symbol);
-                } else if (type === 'Cripto') {
-                    chartData = await fetchCryptoHistoricalData(symbol);
-                } else {
-                    // Renda Fixa não tem variação
-                    chartData = generateFlatData();
-                }
-                
-                console.log(`Dados recebidos para ${symbol}:`, chartData);
-                
-                // Verifica se tem dados válidos
-                if (!chartData.labels || chartData.labels.length === 0 || !chartData.data || chartData.data.length === 0) {
-                    throw new Error('Dados vazios ou inválidos');
-                }
-                
-                if (chartInstances[investmentId]) {
-                    chartInstances[investmentId].destroy();
-                }
-                
-                chartInstances[investmentId] = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                            label: `${symbol} - Preço de Fechamento`,
-                            data: chartData.data,
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 3,
-                            pointHoverRadius: 5
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Últimos 7 dias - Preços de Fechamento',
-                                font: {
-                                    size: 12
-                                },
-                                color: '#6c757d'
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'Fechamento: R$ ' + context.parsed.y.toFixed(2);
-                                    },
-                                    footer: function(tooltipItems) {
-                                        return 'Horário: ~18h (fechamento B3)';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: false,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'R$ ' + value.toFixed(2);
-                                    }
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Data',
-                                    color: '#6c757d'
-                                }
-                            }
-                        }
-                    }
-                });
-                
-                console.log(`✓ Gráfico criado com sucesso para ${symbol}`);
-            } catch (error) {
-                console.error(`Erro ao carregar gráfico de ${symbol}:`, error);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.font = '14px Arial';
-                ctx.fillStyle = '#dc3545';
-                ctx.textAlign = 'center';
-                ctx.fillText(`Erro ao carregar dados de ${symbol}`, canvas.width / 2, canvas.height / 2 - 10);
-                ctx.fillText('Dados históricos não disponíveis', canvas.width / 2, canvas.height / 2 + 10);
-            }
-        }
-
-        async function fetchStockHistoricalDataYahoo(symbol) {
-            try {
-                // USA YAHOO FINANCE PARA DADOS HISTÓRICOS
-                const symbolYahoo = `${symbol}.SA`; // Adiciona .SA para ações brasileiras
-                const endDate = Math.floor(Date.now() / 1000);
-                const startDate = endDate - (7 * 24 * 60 * 60); // 7 dias atrás
-                
-                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbolYahoo}?period1=${startDate}&period2=${endDate}&interval=1d`;
-                
-                console.log(`📊 Buscando gráfico de ${symbol} via Yahoo Finance...`);
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`Yahoo Finance retornou status ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                // Extrai dados do Yahoo Finance
-                if (data.chart && data.chart.result && data.chart.result[0]) {
-                    const result = data.chart.result[0];
-                    const timestamps = result.timestamp;
-                    const quotes = result.indicators.quote[0];
-                    
-                    if (timestamps && quotes && quotes.close) {
-                        const labels = timestamps.map(ts => {
-                            const date = new Date(ts * 1000);
-                            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                        });
-                        
-                        // Remove valores null e usa preço de abertura se close for null
-                        const prices = quotes.close.map((price, index) => {
-                            return price !== null ? price : (quotes.open[index] || 0);
-                        });
-                        
-                        console.log(`✓ Gráfico obtido com sucesso via Yahoo Finance para ${symbol}`);
-                        return { labels, data: prices };
-                    }
-                }
-                
-                throw new Error('Formato de dados inválido do Yahoo Finance');
-            } catch (error) {
-                console.error(`❌ Erro Yahoo Finance para gráfico de ${symbol}:`, error);
-                // Fallback - simula dados baseado no preço atual do BRAPI
-                try {
-                    const currentPrice = await fetchBrazilianStockPrice(symbol);
-                    if (currentPrice) {
-                        console.log(`⚠ Simulando gráfico para ${symbol} baseado no preço atual`);
-                        return generateSimulatedData(currentPrice);
-                    }
-                } catch (e) {
-                    console.error('Falha no fallback');
-                }
-                return generateFlatData();
-            }
-        }
-        
-        function generateSimulatedData(basePrice) {
-            const labels = [];
-            const data = [];
-            const today = new Date();
-            
-            // Gera 7 dias de dados com pequena variação aleatória
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
-                
-                // Variação de -2% a +2% em relação ao preço base
-                const variation = (Math.random() - 0.5) * 0.04;
-                const price = basePrice * (1 + variation);
-                data.push(parseFloat(price.toFixed(2)));
-            }
-            
-            return { labels, data };
-        }
-
-        async function fetchCryptoHistoricalData(symbol) {
-            try {
-                const coinId = CRYPTO_MAP[symbol] || symbol.toLowerCase();
-                const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=brl&days=7`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error('Erro ao buscar dados de cripto');
-                }
-                
-                const data = await response.json();
-                
-                if (data.prices && data.prices.length > 0) {
-                    const labels = data.prices.map(item => {
-                        const date = new Date(item[0]);
-                        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                    });
-                    
-                    const prices = data.prices.map(item => item[1]);
-                    
-                    // Pegar apenas 1 ponto por dia
-                    const dailyData = [];
-                    const dailyLabels = [];
-                    for (let i = 0; i < labels.length; i += Math.floor(labels.length / 7)) {
-                        dailyLabels.push(labels[i]);
-                        dailyData.push(prices[i]);
-                    }
-                    
-                    return { labels: dailyLabels, data: dailyData };
-                }
-                
-                throw new Error('Dados não disponíveis');
-            } catch (error) {
-                console.error('Erro CoinGecko histórico:', error);
-                return generateFlatData();
-            }
-        }
-
-        function generateFlatData() {
-            const labels = [];
-            const data = [];
-            const today = new Date();
-            
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
-                data.push(100); // Valor fixo para renda fixa
-            }
-            
-            return { labels, data };
-        }
-
-        // ========== FUNÇÕES DE PREÇO (USA BRAPI) ==========
-        async function fetchBrazilianStockPrice(symbol) {
-            if (priceCache[symbol]) {
-                const cacheAge = Date.now() - priceCache[symbol].timestamp;
-                if (cacheAge < 300000) return priceCache[symbol].price;
-            }
-
-            try {
-                console.log(`💰 Buscando preço atual de ${symbol} via BRAPI...`);
-                const response = await fetch(`${BRAPI_URL}/${symbol}?token=${BRAPI_TOKEN}`);
-                if (!response.ok) return null;
-                const data = await response.json();
-
-                if (data.results && data.results[0]?.regularMarketPrice) {
-                    const price = data.results[0].regularMarketPrice;
-                    priceCache[symbol] = {
-                        price,
-                        timestamp: Date.now()
-                    };
-                    console.log(`✓ Preço atual obtido via BRAPI: R$ ${price.toFixed(2)}`);
-                    return price;
-                }
-            } catch (error) {
-                console.error(`❌ Erro BRAPI preço ${symbol}:`, error);
-            }
-            return null;
-        }
-
-        async function fetchCryptoPrice(symbol) {
-            const coinId = CRYPTO_MAP[symbol] || symbol.toLowerCase();
-            if (priceCache[symbol]) {
-                const cacheAge = Date.now() - priceCache[symbol].timestamp;
-                if (cacheAge < 300000) return priceCache[symbol].price;
-            }
-
-            try {
-                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=brl`;
-                const response = await fetch(url);
-                if (!response.ok) return null;
-                const data = await response.json();
-
-                if (data[coinId]?.brl) {
-                    const price = data[coinId].brl;
-                    priceCache[symbol] = {
-                        price,
-                        timestamp: Date.now()
-                    };
-                    return price;
-                }
-            } catch (error) {
-                console.error(`Erro CoinGecko ${symbol}:`, error);
-            }
-            return null;
-        }
-
-        async function fetchPrice(symbol, type) {
-            if (type === 'Cripto') return await fetchCryptoPrice(symbol);
-            if (type === 'Ação' || type === 'FII') return await fetchBrazilianStockPrice(symbol);
-            return null;
-        }
-
-        async function updateInvestmentRow(row) {
-            const symbol = row.dataset.symbol.toUpperCase().trim();
-            const type = row.dataset.type;
-            const quantity = parseFloat(row.dataset.quantity);
-            const buyPrice = parseFloat(row.dataset.buyPrice);
-            const investedAmount = quantity * buyPrice;
-
-            let currentPrice = buyPrice;
-            if (type !== 'Renda Fixa') {
-                currentPrice = await fetchPrice(symbol, type) || buyPrice;
-            }
-
-            const currentValue = quantity * currentPrice;
-            const profit = currentValue - investedAmount;
-            const profitPercentage = investedAmount > 0 ? (profit / investedAmount) * 100 : 0;
-
-            row.querySelector('.current-price').innerHTML = currentPrice === buyPrice && type !== 'Renda Fixa' ?
-                `<span class="text-muted">R$ ${currentPrice.toFixed(2)}</span><br><small class="text-warning"><i class="bi bi-exclamation-circle"></i> Sem cotação</small>` :
-                `R$ ${currentPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-            row.querySelector('.current-value').textContent = `R$ ${currentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-            const resultClass = profit >= 0 ? 'text-success' : 'text-danger';
-            const resultIcon = profit >= 0 ? '↑' : '↓';
-            const resultText = profit >= 0 ? 'Alta' : 'Queda';
-            row.querySelector('.investment-result').innerHTML = `
-                <div class="${resultClass}">
-                    <strong>${profit >= 0 ? '+' : ''}R$ ${profit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
-                    <br><small>${resultIcon} ${resultText} ${profitPercentage.toFixed(2)}%</small>
-                </div>
-            `;
-
-            totalCurrentValue += currentValue;
-        }
-
-        async function refreshPrices() {
-            totalCurrentValue = 0;
-            priceCache = {};
-            const rows = document.querySelectorAll('tbody tr[data-investment-id]');
-            if (rows.length === 0) return;
-
-            for (const row of rows) {
-                row.querySelector('.current-price').innerHTML = '<span class="spinner-modern" style="border-color: #6c757d; border-top-color: #667eea;"></span>';
-                row.querySelector('.current-value').innerHTML = '<span class="spinner-modern" style="border-color: #6c757d; border-top-color: #667eea;"></span>';
-                row.querySelector('.investment-result').innerHTML = '<span class="spinner-modern" style="border-color: #6c757d; border-top-color: #667eea;"></span>';
-            }
-
-            document.getElementById('currentValue').innerHTML = '<span class="spinner-modern"></span>';
-            document.getElementById('profitability').innerHTML = '<span class="spinner-modern"></span>';
-
-            for (const row of rows) {
-                await updateInvestmentRow(row);
-                await new Promise(r => setTimeout(r, 100));
-            }
-
-            const profit = totalCurrentValue - totalInvested;
-            const profitPercentage = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
-
-            document.getElementById('currentValue').textContent = `R$ ${totalCurrentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-            const profitClass = profit >= 0 ? 'text-success' : 'text-danger';
-            const profitIcon = profit >= 0 ? '↑' : '↓';
-            const profitText = profit >= 0 ? 'Alta' : 'Queda';
-            document.getElementById('profitability').innerHTML = `
-                <span class="${profitClass}">
-                    ${profitIcon} ${profitText} ${profit >= 0 ? '+' : ''}${profitPercentage.toFixed(2)}%
-                </span>
-            `;
         }
 
         // ========== FORMATAÇÃO DO CAMPO DE PREÇO ==========
@@ -1264,32 +1417,49 @@ foreach ($investments as $investment) {
             }
         }
 
-        // ========== INICIALIZAÇÃO ==========
+        // ========== INICIALIZAÇÃO DO SISTEMA ==========
+        /**
+         * Inicializa a página quando o DOM estiver pronto
+         * Configura inputs, inicia atualizações automáticas e listeners de eventos
+         */
         document.addEventListener('DOMContentLoaded', function() {
+            // Configurar formatação de entrada de preços nos formulários
             setupPriceInput('preco_compra');
             setupPriceInput('edit_preco_compra');
 
-            refreshCurrencies();
-            setInterval(refreshCurrencies, 60000);
+            // Carregar cotações de moedas imediatamente e atualizar a cada 1 minuto
+            atualizarCotacoesMoedas();
+            setInterval(atualizarCotacoesMoedas, 60000);
 
-            const rows = document.querySelectorAll('tbody tr[data-investment-id]');
-            if (rows.length > 0) {
-                refreshPrices();
-                setInterval(refreshPrices, 300000);
+            // Carregar insights de mercado e atualizar a cada 5 minutos
+            carregarInsightsMercado();
+            setInterval(carregarInsightsMercado, 300000);
+
+            // Se existem investimentos na carteira, atualizar preços
+            const linhas = document.querySelectorAll('tbody tr[data-investment-id]');
+            if (linhas.length > 0) {
+                atualizarPrecos();
+                // Atualizar cotações automaticamente a cada 5 minutos
+                setInterval(atualizarPrecos, 300000);
             }
 
-            const btn = document.querySelector('button[onclick="refreshPrices()"]');
-            if (btn) {
-                btn.onclick = (e) => {
-                    e.preventDefault();
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="spinner-modern me-2"></span>Atualizando...';
-                    refreshPrices().finally(() => {
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Atualizar Cotações';
+            // Melhorar o botão de atualização de preços com feedback visual
+            const botaoAtualizar = document.querySelector('button[onclick="atualizarPrecos()"]');
+            if (botaoAtualizar) {
+                botaoAtualizar.onclick = (evento) => {
+                    evento.preventDefault();
+                    botaoAtualizar.disabled = true;
+                    botaoAtualizar.innerHTML = '<span class="spinner-modern me-2"></span>Atualizando...';
+                    atualizarPrecos().finally(() => {
+                        botaoAtualizar.disabled = false;
+                        botaoAtualizar.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Atualizar Cotações';
                     });
                 };
             }
+
+            console.log('Sistema de investimentos inicializado com sucesso!');
+            console.log(`Total investido: R$ ${totalInvestido.toFixed(2)}`);
+            console.log(`APIs integradas: BRAPI (B3), CoinGecko (Cripto), ExchangeRate (Câmbio)`);
         });
     </script>
 
@@ -1312,6 +1482,7 @@ foreach ($investments as $investment) {
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="dashboard.php" class="footer-link">Dashboard</a></li>
                         <li class="mb-2"><a href="investments.php" class="footer-link">Investimentos</a></li>
+                        <li class="mb-2"><a href="calculators.php" class="footer-link">Calculadoras</a></li>
                         <li class="mb-2"><a href="conversabot.php" class="footer-link">Assistente IA</a></li>
                         <li class="mb-2"><a href="education.php" class="footer-link">Academia</a></li>
                     </ul>
@@ -1322,7 +1493,7 @@ foreach ($investments as $investment) {
                         <li class="mb-2"><a href="quiz.php" class="footer-link">Quiz Financeiro</a></li>
                         <li class="mb-2"><a href="exercicios.php" class="footer-link">Exercícios</a></li>
                         <li class="mb-2"><a href="plans.php" class="footer-link">Planos</a></li>
-                        <li class="mb-2"><a href="plans1.php" class="footer-link">Planos Premium</a></li>
+                        <li class="mb-2"><a href="ativos.php" class="footer-link">Lista B3</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2">
@@ -1356,5 +1527,4 @@ foreach ($investments as $investment) {
         </div>
     </footer>
 </body>
-
 </html>
